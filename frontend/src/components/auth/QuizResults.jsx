@@ -29,7 +29,7 @@ const QuizResults = () => {
 
   useEffect(() => {
     fetchResults();
-  }, [attemptId]);
+  }, [attemptId, results?.allow_review]);
 
   const fetchResults = async () => {
     try {
@@ -39,7 +39,7 @@ const QuizResults = () => {
       setResults(data);
       
       // Check if viewing as creator (has participant info)
-      setIsCreator(!!data.participant);
+      setIsCreator(data.is_creator || false);;
       
       // Initialize grades state for essay questions
       if (data.answers) {
@@ -279,7 +279,7 @@ const QuizResults = () => {
         </div>
 
         {/* Review Button */}
-        {results.allow_review && results.answers && (
+        {(results.allow_review || results.is_creator) && results.answers && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <button
               onClick={() => setShowReview(!showReview)}
@@ -551,7 +551,7 @@ const QuizResults = () => {
           </div>
         )}
 
-        {!results.show_details && (
+        {!results.show_details && !results.is_creator && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
             <p className="text-sm text-blue-800">
               Detailed results and answer review are not available for this quiz. 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { quizService } from '../../services/quizService';
 import { useAuth } from '../../hooks/useAuth';
 import { Users } from 'lucide-react';
@@ -28,34 +28,62 @@ export default function MyQuizzes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
   const [editingQuizId, setEditingQuizId] = useState(null);
   const [copiedCode, setCopiedCode] = useState(null);
   const navigate = useNavigate();
   
+  // Prevent multiple simultaneous fetches
+  const isFetchingRef = useRef(false);
 
-  
+  const fetchMyQuizzes = useCallback(async () => {
+    // Prevent duplicate calls
+    if (isFetchingRef.current) {
+      console.log('⏭️ Already fetching quizzes, skipping...');
+      return;
+    }
 
-  const fetchMyQuizzes = async () => {
     try {
+      isFetchingRef.current = true;
       setLoading(true);
       setError('');
+      
+      console.log('🔍 Fetching quizzes...');
       const response = await quizService.getMyQuizzes({
         per_page: 50,
-        search: searchTerm || undefined
+        search: searchQuery || undefined
       });
+      
       setQuizzes(response.data.data || response.data);
+      console.log('✅ Quizzes loaded successfully');
     } catch (err) {
       console.error('Error fetching quizzes:', err);
       setError('Failed to load quizzes. Please try again.');
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  };
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchMyQuizzes();
-  }, [searchTerm]);
+  }, [fetchMyQuizzes]);
+
+  const handleSearch = () => {
+    setSearchQuery(searchTerm);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setSearchQuery('');
+  };
 
   const handleShareCode = (quiz) => {
     if (!quiz.code) {
@@ -159,8 +187,6 @@ export default function MyQuizzes() {
     }
   };
 
-  
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -206,8 +232,40 @@ export default function MyQuizzes() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">My Quizzes</h2>
           <p className="text-gray-600">Manage and track your created quizzes</p>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search quizzes by title or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
+            />
+            {searchTerm && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <button
+            onClick={handleSearch}
+            className="bg-[#E46036] hover:bg-[#cc4f2d] text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <Search className="w-4 h-4" />
+            <span className="hidden sm:inline">Search</span>
+          </button>
         </div>
       </div>
 
@@ -231,17 +289,8 @@ export default function MyQuizzes() {
           <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No quizzes found</h3>
           <p className="text-gray-600 mb-6">
-            {searchTerm ? 'No quizzes match your search.' : "You haven't created any quizzes yet."}
+            {searchQuery ? 'No quizzes match your search.' : "You haven't created any quizzes yet."}
           </p>
-          {!searchTerm && (
-            <button
-              onClick={() => window.location.href = '/dashboard?page=create-quiz'}
-              className="bg-[#E46036] hover:bg-[#cc4f2d] text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Your First Quiz
-            </button>
-          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -330,17 +379,28 @@ export default function MyQuizzes() {
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => handlePublish(quiz.id)}
-                      disabled={actionLoading === quiz.id}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      Publish
-                    </button>
+                    <>
+                      <button
+                        onClick={() => handlePublish(quiz.id)}
+                        disabled={actionLoading === quiz.id}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Publish
+                      </button>
+                      
+                      {/* Edit button - only shown when NOT published */}
+                      <button
+                        onClick={() => setEditingQuizId(quiz.id)}
+                        className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </button>
+                    </>
                   )}
                   
-                  {/* NEW: View Participants Button */}
+                  {/* View Participants Button - always visible */}
                   <button
                     onClick={() => navigate(`/quiz-participants/${quiz.id}`)}
                     className="px-3 py-2 border border-blue-300 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors flex items-center"
@@ -350,14 +410,7 @@ export default function MyQuizzes() {
                     Participants
                   </button>
                   
-                  <button
-                    onClick={() => setEditingQuizId(quiz.id)}
-                    className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Edit
-                  </button>
-                  
+                  {/* Delete button - always visible */}
                   <button
                     onClick={() => handleDelete(quiz.id, quiz.title)}
                     disabled={actionLoading === quiz.id}

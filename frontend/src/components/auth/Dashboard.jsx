@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import Swal from 'sweetalert2';
@@ -6,16 +6,23 @@ import CreateQuiz from "./CreateQuiz";
 import MyQuizzes from "./MyQuizzes";
 import JoinQuiz from "./JoinQuiz";
 import MyResults from "./MyResults";
+import Settings from "./Settings";
+import axios from 'axios';
 
 import {
-  BookOpen, Users, BarChart3, Settings, Plus, Award, TrendingUp,
-  User, LogOut, Menu, X, PlayCircle, ClipboardList // Added ClipboardList
+  BookOpen, Users, BarChart3, Plus, TrendingUp, LogOut, Menu, X, PlayCircle, ClipboardList, Settings as SettingsIcon
 } from "lucide-react";
+
 
 export default function Dashboard() {
 
   const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
+  
+  // Add refs to prevent multiple API calls
+  const hasFetchedRef = useRef(false);
+  const isFetchingRef = useRef(false);
+  
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [userStats, setUserStats] = useState({
@@ -40,45 +47,31 @@ export default function Dashboard() {
     }
   }, [navigate]);
 
-  // Fetch user-specific dashboard data
-  const fetchUserDashboardData = async () => {
-    if (!user?.id) {
-      console.log("❌ No user ID found:", user);
-      setLoading(false);
+  // Memoized fetch function with duplicate call prevention
+  const fetchUserDashboardData = useCallback(async () => {
+    // Prevent duplicate calls
+    if (!user?.id || isFetchingRef.current) {
+      console.log("⏭️ Skipping fetch - already fetching or no user ID");
       return;
     }
 
     try {
+      isFetchingRef.current = true;
       setLoading(true);
       setStatsError(false);
       const token = localStorage.getItem("auth_token");
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-      console.log("🔍 Fetching dashboard stats...");
-      console.log("User ID:", user.id);
-      console.log("Token exists:", !!token);
-      console.log("API URL:", `${API_URL}/api/users/${user.id}/dashboard-stats`);
+      console.log("🔍 Fetching dashboard stats (single call)...");
 
-      const response = await fetch(`${API_URL}/api/users/${user.id}/dashboard-stats`, {
+      const response = await axios.get(`${API_URL}/users/${user.id}/dashboard-stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      console.log("📡 Response status:", response.status);
-      
-      const data = await response.json();
-      console.log("📦 Response data:", data);
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("auth_token");
-          navigate("/login", { replace: true });
-          return;
-        }
-        throw new Error(data.message || `Server error: ${response.status}`);
-      }
+      const data = response.data;
       
       if (data.success) {
         setUserStats({
@@ -88,16 +81,24 @@ export default function Dashboard() {
           totalQuestions: data.totalQuestions || 0,
           totalAttempts: data.totalAttempts || 0,
           uniqueParticipants: data.uniqueParticipants || 0,
-          averageScore: data.averageScore || 0,
           highestScore: data.highestScore || 0,
           completionRate: data.completionRate || 0,
           recentQuizzes: data.recentQuizzes || []
         });
+        hasFetchedRef.current = true;
+        console.log("✅ Dashboard stats loaded successfully");
       } else {
         throw new Error(data.message || 'Failed to load stats');
       }
     } catch (error) {
       console.error('❌ Error fetching dashboard data:', error);
+      
+      if (error.response?.status === 401) {
+        localStorage.removeItem("auth_token");
+        navigate("/login", { replace: true });
+        return;
+      }
+      
       setStatsError(true);
       setUserStats({
         totalQuizzes: 0,
@@ -106,21 +107,22 @@ export default function Dashboard() {
         totalQuestions: 0,
         totalAttempts: 0,
         uniqueParticipants: 0,
-        averageScore: 0,
         highestScore: 0,
         completionRate: 0,
         recentQuizzes: []
       });
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  };
+  }, [user?.id, navigate]);
 
+  // Only fetch once when user is available and data hasn't been fetched
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user?.id && !hasFetchedRef.current) {
       fetchUserDashboardData();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user?.id, fetchUserDashboardData]);
 
   const handleNavigation = (page) => {
     setCurrentPage(page);
@@ -148,8 +150,10 @@ export default function Dashboard() {
     });
   };
 
-  // Handle successful quiz creation
+  // Handle successful quiz creation - allow manual refresh
   const handleQuizCreated = () => {
+    // Reset flag to allow refetch
+    hasFetchedRef.current = false;
     // Refresh dashboard stats
     fetchUserDashboardData();
     // Navigate back to dashboard
@@ -237,8 +241,7 @@ export default function Dashboard() {
           </div>
           <div className="px-6 py-3 border-t border-gray-200 mt-6">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Settings</p>
-            <NavItem icon={Settings} label="Settings" pageKey="settings" isActive={currentPage === 'settings'} />
-            <NavItem icon={User} label="Profile" pageKey="profile" isActive={currentPage === 'profile'} />
+            <NavItem icon={SettingsIcon} label="Settings" pageKey="settings" isActive={currentPage === 'settings'} />
           </div>
         </nav>
         <div className="absolute bottom-10 left-10 right-10">
@@ -260,7 +263,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="lg:ml-64">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center">
               <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4">
@@ -281,9 +284,6 @@ export default function Dashboard() {
                 <Plus className="w-4 h-4 mr-2" />
                 Create Quiz
               </button>
-              <div className="w-8 h-8 bg-[#E46036] rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
             </div>
           </div>
         </header>
@@ -299,10 +299,10 @@ export default function Dashboard() {
                 <p className="text-gray-600">Here's what's happening with your quizzes today.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <StatCard
                   icon={BookOpen}
-                  title="My Quizzes"
+                  title="Quizzes"
                   value={userStats.totalQuizzes}
                   color="bg-[#E46036]"
                   onClick={() => handleNavigation('quizzes')}
@@ -319,13 +319,8 @@ export default function Dashboard() {
                   value={userStats.activeQuizzes}
                   color="bg-[#E46036]"
                 />
-                <StatCard
-                  icon={Award}
-                  title="Average Score"
-                  value={userStats.averageScore}
-                  color="bg-[#E46036]"
-                />
               </div>
+
 
               {/* Recent Quizzes Section */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
@@ -382,6 +377,8 @@ export default function Dashboard() {
           {currentPage === 'join' && <JoinQuiz />}
           {currentPage === 'create-quiz' && <CreateQuiz onSuccess={handleQuizCreated} />}
           {currentPage === 'my-results' && <MyResults />}
+          {currentPage === 'settings' && <Settings />}
+
         </main>
       </div>
     </div>

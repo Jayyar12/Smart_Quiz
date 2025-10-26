@@ -6,6 +6,7 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\EssayGradingController;
+use App\Http\Controllers\Api\UserSettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,25 +19,42 @@ Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/landingpage', [AuthController::class, 'landingPage']);
 
+// Forgot Password Routes
+Route::post('/password/forgot', [PasswordResetController::class, 'sendResetLink']);
+Route::post('/password/reset', [PasswordResetController::class, 'reset']);
+Route::post('/password/validate-token', [PasswordResetController::class, 'validateToken']);
+
+// Protected routes - require authentication
+Route::middleware(['auth:sanctum'])->group(function () {
+    
+    // Get user profile/settings
+    Route::get('/user/profile', [UserSettingsController::class, 'getProfile']);
+    
+    // Update display name
+    Route::put('/user/profile/name', [UserSettingsController::class, 'updateName']);
+    
+    // Email change workflow
+    Route::post('/user/email/request-change', [UserSettingsController::class, 'requestEmailChange']);
+    Route::post('/user/email/verify', [UserSettingsController::class, 'verifyEmailChange']);
+    
+    // Password management
+    Route::put('/user/password', [UserSettingsController::class, 'updatePassword']);
+    
+    // Session management
+    Route::post('/user/logout-all', [UserSettingsController::class, 'logoutAllDevices']);
+    
+    // Account deletion workflow
+    Route::get('/user/deletion-status', [UserSettingsController::class, 'getDeletionStatus']);
+    Route::post('/user/account/delete', [UserSettingsController::class, 'requestAccountDeletion']);
+    Route::post('/user/account/cancel-delete', [UserSettingsController::class, 'cancelAccountDeletion']);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
-
-
-    // Get all ungraded essays for a quiz
-    Route::get('/quizzes/{quizId}/ungraded-essays', [EssayGradingController::class, 'getUngradedEssays']);
-    
-    // Get essay answers for a specific attempt
-    Route::get('/attempts/{attemptId}/essays', [EssayGradingController::class, 'getEssaysForAttempt']);
-    
-    // Grade a single essay answer
-    Route::post('/answers/{answerId}/grade', [EssayGradingController::class, 'gradeAnswer']);
-    
-    // Grade multiple essay answers at once
-    Route::post('/answers/grade-multiple', [EssayGradingController::class, 'gradeMultipleAnswers']);
 
     /*
     |------------------------------
@@ -81,9 +99,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/quizzes/{id}/start', [QuizController::class, 'startQuiz']);
 
     Route::get('/attempts/{attemptId}/progress', [QuizController::class, 'getAttemptProgress']);
-
     Route::post('/attempts/{attemptId}/save-progress', [QuizController::class, 'saveProgress']);
     Route::post('/attempts/{attemptId}/submit', [QuizController::class, 'submitQuiz']);
+    
+    // ✅ Single results route (removed duplicate)
     Route::get('/attempts/{attemptId}/results', [QuizController::class, 'getResults']);
 
     /*
@@ -92,6 +111,16 @@ Route::middleware('auth:sanctum')->group(function () {
     |------------------------------
     */
     Route::get('/my-attempts', [QuizController::class, 'getMyAttempts']);
+
+    /*
+    |------------------------------
+    | Essay Grading
+    |------------------------------
+    */
+    Route::get('/quizzes/{quizId}/ungraded-essays', [EssayGradingController::class, 'getUngradedEssays']);
+    Route::get('/attempts/{attemptId}/essays', [EssayGradingController::class, 'getEssaysForAttempt']);
+    Route::post('/answers/{answerId}/grade', [EssayGradingController::class, 'gradeAnswer']);
+    Route::post('/answers/grade-multiple', [EssayGradingController::class, 'gradeMultipleAnswers']);
 });
 
 /*
@@ -104,12 +133,3 @@ Route::fallback(function () {
         'message' => 'Route not found or unauthorized'
     ], 404);
 });
-
-/*
-|--------------------------------------------------------------------------
-| Forgot Password Route
-|--------------------------------------------------------------------------
-*/
-Route::post('/password/forgot', [PasswordResetController::class, 'sendResetLink']);
-Route::post('/password/reset', [PasswordResetController::class, 'reset']);
-Route::post('/password/validate-token', [PasswordResetController::class, 'validateToken']);

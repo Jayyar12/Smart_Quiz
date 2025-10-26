@@ -41,7 +41,6 @@ class DashboardController extends Controller
 
         $totalAttempts = $attemptStats->total_attempts ?? 0;
         $uniqueParticipants = $attemptStats->unique_participants ?? 0;
-        $averageScore = round($attemptStats->average_score ?? 0, 2);
         $highestScore = $attemptStats->highest_score ?? 0;
 
         $recentQuizzes = Quiz::where('user_id', $id)
@@ -67,7 +66,6 @@ class DashboardController extends Controller
             'totalQuestions' => $totalQuestions,
             'totalAttempts' => $totalAttempts,
             'uniqueParticipants' => $uniqueParticipants,
-            'averageScore' => $averageScore,
             'highestScore' => $highestScore,
             'completionRate' => $completionRate,
             'recentQuizzes' => $recentQuizzes,

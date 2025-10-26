@@ -585,7 +585,7 @@ public function getResults(Request $request, $attemptId)
         'quiz',
         'answers.question.choices',
         'answers.choice',
-        'user' // Add user relationship for participant info
+        'user'
     ])->findOrFail($attemptId);
 
     // Authorization: Allow if user owns the attempt OR owns the quiz
@@ -605,9 +605,11 @@ public function getResults(Request $request, $attemptId)
         ], 422);
     }
 
-    // Check if results should be shown
-    // Note: Quiz creators can always see results, students need show_results_immediately
-    if (!$isQuizCreator && !$attempt->quiz->show_results_immediately) {
+    // ✅ FIX: Creators can ALWAYS see full details
+    // Students can only see details if show_results_immediately is enabled
+    $canSeeDetails = $isQuizCreator || $attempt->quiz->show_results_immediately;
+
+    if (!$canSeeDetails) {
         return response()->json([
             'message' => 'Results not available yet',
             'data' => [
@@ -620,14 +622,15 @@ public function getResults(Request $request, $attemptId)
 
     $responseData = [
         'attempt_id' => $attempt->id,
-        'quiz_id' => $attempt->quiz_id, // ADD THIS LINE
+        'quiz_id' => $attempt->quiz_id,
         'quiz_title' => $attempt->quiz->title,
         'score' => $attempt->score,
         'total_points' => $attempt->quiz->total_points,
         'percentage' => round(($attempt->score / $attempt->quiz->total_points) * 100, 2),
         'completed_at' => $attempt->completed_at,
         'allow_review' => $attempt->quiz->allow_review,
-        'show_details' => true,
+        'show_details' => true, // ✅ Always true when this point is reached
+        'is_creator' => $isQuizCreator,
     ];
 
     // Add participant info if viewing as quiz creator
@@ -639,22 +642,25 @@ public function getResults(Request $request, $attemptId)
         ];
     }
 
-    // Include answers if review is allowed OR if user is the quiz creator
+    // ✅ FIX: Include answers if review is allowed OR if user is the quiz creator
+    // This ensures creators can ALWAYS see answers to grade essays
     if ($attempt->quiz->allow_review || $isQuizCreator) {
         $responseData['answers'] = $attempt->answers->map(function ($answer) {
             return [
-                'answer_id' => $answer->id, // ADD THIS LINE - CRITICAL!
+                'answer_id' => $answer->id,
                 'question_id' => $answer->question_id,
                 'question_text' => $answer->question->question_text,
                 'question_type' => $answer->question->type,
-                'user_answer' => $answer->choice_id ? $answer->choice->choice_text : $answer->answer_text,
+                'user_answer' => $answer->choice_id 
+                    ? $answer->choice->choice_text 
+                    : $answer->answer_text,
                 'correct_answer' => $answer->question->type === 'multiple_choice' 
                     ? $answer->question->choices->where('is_correct', true)->first()?->choice_text
                     : $answer->question->correct_answer,
                 'is_correct' => $answer->is_correct,
-                'points_earned' => $answer->points_earned,
+                'points_earned' => $answer->points_earned ?? 0,
                 'points_possible' => $answer->question->points,
-                'feedback' => $answer->feedback, // ADD THIS LINE
+                'feedback' => $answer->feedback,
                 'choices' => $answer->question->type === 'multiple_choice' 
                     ? $answer->question->choices 
                     : null,
@@ -717,6 +723,15 @@ public function getResults(Request $request, $attemptId)
         $query = Quiz::with(['questions'])
             ->where('user_id', $request->user()->id)
             ->latest();
+
+        // Add search functionality
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', '%' . $searchTerm . '%')
+                ->orWhere('description', 'like', '%' . $searchTerm . '%');
+            });
+        }
 
         $quizzes = $query->paginate($request->get('per_page', 15));
 

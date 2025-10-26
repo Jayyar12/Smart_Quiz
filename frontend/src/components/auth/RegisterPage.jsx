@@ -61,7 +61,7 @@ const RegisterPage = () => {
     setSuccessMessage('');
 
     try {
-      const res = await axios.post('http://localhost:8000/api/register', formData);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/register`, formData);
       
       // ✅ Get email from response
       const email = res.data.email || formData.email;
@@ -91,7 +91,7 @@ const RegisterPage = () => {
     setSuccessMessage('');
 
     try {
-      const res = await axios.post('http://localhost:8000/api/verify-otp', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/verify-otp`, {
         email: emailForOtp,
         otp: otp.trim(),
       });
@@ -128,7 +128,7 @@ const RegisterPage = () => {
     setSuccessMessage('');
 
     try {
-      await axios.post('http://localhost:8000/api/resend-otp', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/resend-otp`, {
         email: emailForOtp,
       });
       
