@@ -45,6 +45,7 @@ export const authService = {
   },
 
   async login(credentials) {
+    console.log('Sending credentials:', credentials); // DEBUG
     const response = await api.post('/login', credentials);
     if (response.data.token) {
       localStorage.setItem('auth_token', response.data.token);
@@ -52,6 +53,7 @@ export const authService = {
     }
     return response.data;
   },
+
 
   async logout() {
     try {

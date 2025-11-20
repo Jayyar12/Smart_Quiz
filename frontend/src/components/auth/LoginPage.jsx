@@ -30,25 +30,27 @@ const LoginPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrors({});
+  e.preventDefault();
+  setLoading(true);
+  setErrors({});
 
-    try {
-      await login(formData);
-      navigate("/dashboard");
-    } catch (error) {
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors);
-      } else if (error.response?.data?.message) {
-        setErrors({ general: error.response.data.message });
-      } else {
-        setErrors({ general: "An error occurred. Please try again." });
-      }
-    } finally {
-      setLoading(false);
+  try {
+    await login(formData);
+    navigate("/dashboard");
+  } catch (error) {
+    console.log('Full error:', error.response); // DEBUG
+    console.log('Error data:', error.response?.data); // DEBUG
+    if (error.response?.data?.errors) {
+      setErrors(error.response.data.errors);
+    } else if (error.response?.data?.message) {
+      setErrors({ general: error.response.data.message });
+    } else {
+      setErrors({ general: "An error occurred. Please try again." });
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F1EDE5] text-gray-800 relative overflow-hidden">
