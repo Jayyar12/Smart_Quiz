@@ -2,15 +2,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
-import LoginPage from "./components/auth/LoginPage";
-import RegisterPage from "./components/auth/RegisterPage";
-import Dashboard from "./components/auth/Dashboard";
-import LandingPage from "./components/auth/LandingPage";
-import QuizCreationPage from "./components/auth/CreateQuiz";
-import JoinQuiz from "./components/auth/JoinQuiz";
-import TakeQuiz from "./components/auth/TakeQuiz";
-import QuizResults from "./components/auth/QuizResults";
-import QuizParticipants from "./components/auth/QuizParticipants";
+import LoginPage from "./components/Pages/LoginPage";
+import RegisterPage from "./components/Pages/RegisterPage";
+import Dashboard from "./components/Pages/Dashboard";
+import LandingPage from "./components/Pages/LandingPage";
+import QuizCreationPage from "./components/Pages/CreateQuiz";
+import JoinQuiz from "./components/Pages/JoinQuiz";
+import TakeQuiz from "./components/Pages/TakeQuiz";
+import QuizResults from "./components/Pages/QuizResults";
+import QuizParticipants from "./components/Pages/QuizParticipants";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 

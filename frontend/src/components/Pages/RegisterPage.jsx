@@ -34,7 +34,7 @@ const RegisterPage = () => {
     if (/[^A-Za-z0-9]/.test(pass)) score++;
     return score;
   };
-  
+
   const strengthLabels = ['Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
   const passwordStrength = getPasswordStrength(formData.password);
 
@@ -62,7 +62,7 @@ const RegisterPage = () => {
 
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/register`, formData);
-      
+
       // ✅ Get email from response
       const email = res.data.email || formData.email;
       setEmailForOtp(email);
@@ -70,7 +70,7 @@ const RegisterPage = () => {
       localStorage.setItem('otpStep', 'true');
       localStorage.setItem('emailForOtp', email);
       setSuccessMessage('OTP has been sent to your email. Please check your inbox.');
-      
+
     } catch (error) {
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
@@ -131,10 +131,10 @@ const RegisterPage = () => {
       await axios.post(`${import.meta.env.VITE_API_URL}/resend-otp`, {
         email: emailForOtp,
       });
-      
+
       setSuccessMessage('A new OTP has been sent to your email.');
       setOtp(''); // Clear OTP input
-      
+
     } catch (error) {
       if (error.response?.data?.message) {
         setErrors({ general: error.response.data.message });
@@ -146,8 +146,10 @@ const RegisterPage = () => {
     }
   };
 
+  {/* CARD content Form */}
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#F1EDE5] px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      
       {/* Navigation */}
       <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-[#FFFFFF]/90 backdrop-blur-md shadow-sm border-b border-[#E46036]/20">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -174,9 +176,10 @@ const RegisterPage = () => {
 
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="md:hidden absolute top-full left-0 right-0 bg-[#FFFFFF] shadow-xl border-t border-[#E46036]/20"
+            initial={{ opacity: 0, scale: 0.9, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative bg-white border border-[#E46036]/20 rounded-3xl p-10 w-full max-w-md shadow-xl"
           >
             <div className="px-6 py-4 space-y-4">
               <div className="flex space-x-4">
@@ -198,11 +201,21 @@ const RegisterPage = () => {
       >
         {!otpStep ? (
           <>
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-[#E46036] mb-2">Join Smart Quiz</h2>
-              <p className="text-gray-600">Create your account</p>
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-16 h-16 bg-[#E46036] rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white font-extrabold text-xl">SM</span>
+              </div>
+              <h2 className="mt-2 text-2xl font-bold tracking-wide text-[#000000]">Smart Quiz</h2>
             </div>
 
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-3xl font-extrabold text-center text-[#000000] mb-6"
+            >
+              Register Smart Quiz
+            </motion.h1>
             <form className="space-y-6" onSubmit={handleSubmit}>
               {errors.general && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -217,21 +230,17 @@ const RegisterPage = () => {
               )}
 
               {/* Name */}
-              <div>
+              <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
                 <input
-                  id="name"
                   name="name"
-                  type="text"
-                  required
-                  className={`w-full px-3 py-3 border rounded-full focus:outline-none focus:ring-2 ${
-                    errors.name ? 'border-red-500' : 'focus:ring-[#E46036] border-gray-300'
-                  }`}
                   placeholder="Full Name"
                   value={formData.name}
                   onChange={handleChange}
+                  required
+                  className={`w-full px-5 py-3 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.name ? 'border-red-500' : ''}`}
                 />
                 {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name[0]}</p>}
-              </div>
+              </motion.div>
 
               {/* Email */}
               <div>
@@ -240,9 +249,7 @@ const RegisterPage = () => {
                   name="email"
                   type="email"
                   required
-                  className={`w-full px-3 py-3 border rounded-full focus:outline-none focus:ring-2 ${
-                    errors.email ? 'border-red-500' : 'focus:ring-[#E46036] border-gray-300'
-                  }`}
+                 className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.email ? 'border-red-500' : ''}`}
                   placeholder="Email Address"
                   value={formData.email}
                   onChange={handleChange}
@@ -253,40 +260,33 @@ const RegisterPage = () => {
               {/* Password */}
               <div>
                 <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    className={`w-full px-3 py-3 pr-12 border rounded-full focus:outline-none focus:ring-2 ${
-                      errors.password ? 'border-red-500' : 'focus:ring-[#E46036] border-gray-300'
-                    }`}
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-
+                  <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="relative">
+                    <input
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password ? 'border-red-500' : ''}`}
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                      {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                    </button>
+                  </motion.div>
+                </div>  
                 {formData.password && (
                   <div className="mt-2">
                     <div className="h-2 w-full bg-gray-200 rounded-full">
                       <div
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          passwordStrength <= 1
-                            ? 'bg-red-500 w-1/4'
-                            : passwordStrength === 2
+                        className={`h-2 rounded-full transition-all duration-300 ${passwordStrength <= 1
+                          ? 'bg-red-500 w-1/4'
+                          : passwordStrength === 2
                             ? 'bg-yellow-500 w-2/4'
                             : passwordStrength === 3
-                            ? 'bg-blue-500 w-3/4'
-                            : 'bg-green-500 w-full'
-                        }`}
+                              ? 'bg-blue-500 w-3/4'
+                              : 'bg-green-500 w-full'
+                          }`}
                       ></div>
                     </div>
                     <p className="text-sm mt-1 text-gray-600">
@@ -305,11 +305,7 @@ const RegisterPage = () => {
                     name="password_confirmation"
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
-                    className={`w-full px-3 py-3 pr-12 border rounded-full focus:outline-none focus:ring-2 ${
-                      errors.password_confirmation
-                        ? 'border-red-500'
-                        : 'focus:ring-[#E46036] border-gray-300'
-                    }`}
+                    className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password_confirmation ? 'border-red-500' : ''}`}
                     placeholder="Confirm Password"
                     value={formData.password_confirmation}
                     onChange={handleChange}
@@ -319,7 +315,7 @@ const RegisterPage = () => {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                   </button>
                 </div>
                 {errors.password_confirmation && <p className="mt-1 text-sm text-red-600">{errors.password_confirmation[0]}</p>}
@@ -331,9 +327,8 @@ const RegisterPage = () => {
                 whileTap={{ scale: 0.97 }}
                 type="submit"
                 disabled={loading}
-                className={`w-full flex items-center justify-center ${
-                  loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#E46036] hover:bg-[#cc4f2d]'
-                } text-white font-semibold py-3 px-4 rounded-xl shadow-md transition`}
+                className={`w-full flex items-center justify-center ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#E46036] hover:bg-[#000000]'
+                  } text-white font-semibold py-3 px-4 rounded-full shadow-md transition`}
               >
                 {loading ? (
                   <>
@@ -393,11 +388,10 @@ const RegisterPage = () => {
               whileTap={{ scale: 0.97 }}
               type="submit"
               disabled={otpLoading || otp.length !== 6}
-              className={`w-full flex items-center justify-center ${
-                otpLoading || otp.length !== 6
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-[#E46036] hover:bg-[#cc4f2d]'
-              } text-white font-semibold py-3 px-4 rounded-xl shadow-md transition`}
+              className={`w-full flex items-center justify-center ${otpLoading || otp.length !== 6
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-[#E46036] hover:bg-[#cc4f2d]'
+                } text-white font-semibold py-3 px-4 rounded-xl shadow-md transition`}
             >
               {otpLoading ? (
                 <>

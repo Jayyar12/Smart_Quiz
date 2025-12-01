@@ -166,7 +166,7 @@ const JoinQuiz = () => {
                 value={code}
                 onChange={handleCodeChange}
                 placeholder="ABC123"
-                className="w-full px-4 py-3 text-center text-2xl font-bold tracking-widest border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent uppercase"
+                className="w-full px-4 py-3 text-center text-2xl font-bold tracking-widest border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent uppercase outline-none"
                 maxLength={6}
                 autoFocus
               />

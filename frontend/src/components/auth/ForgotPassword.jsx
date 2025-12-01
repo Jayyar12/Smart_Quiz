@@ -13,7 +13,7 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!email) {
       setStatus('error');
       setMessage('Please enter your email address');
@@ -26,7 +26,7 @@ const ForgotPassword = () => {
 
     try {
       const response = await axios.post(`${API_URL}/password/forgot`, {
-        email: email.trim()
+        email: email.trim(),
       });
 
       setStatus('success');
@@ -45,35 +45,34 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Back to Login Link */}
-        <Link
-          to="/login"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Login
-        </Link>
-
+    <div className="min-h-screen flex items-center justify-center bg-[#F1EDE5] px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+  <div className="w-full max-w-md">
+    {/* Back to Login Link */}
+    <Link
+      to="/login"
+      className="inline-flex items-center text-gray-700 hover:text-[#E46036] font-medium mb-6 transition-colors duration-300"
+    >
+      <ArrowLeft className="w-5 h-5 mr-2 text-gray-500 group-hover:text-[#E46036] transition-colors duration-300" />
+      Back to Login
+    </Link> 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-white/40">
           {/* Icon */}
-          <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Mail className="w-8 h-8 text-[#E46036]" />
+          <div className="w-20 h-20 bg-gradient-to-br from-[#E46036] to-orange-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-300">
+            <Mail className="w-9 h-9 text-white" />
           </div>
 
           {/* Header */}
-          <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
+          <h1 className="text-4xl font-extrabold text-gray-900 text-center mb-2 tracking-wide">
             Forgot Password?
           </h1>
-          <p className="text-gray-600 text-center mb-8">
+          <p className="text-gray-600 text-center mb-6 text-sm leading-relaxed">
             No worries! Enter your email and we'll send you reset instructions.
           </p>
 
           {/* Status Messages */}
           {status === 'success' && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start">
+            <div className="mb-6 p-5 bg-green-50 border border-green-200 rounded-xl flex items-start shadow-md">
               <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm text-green-800 font-medium">Success!</p>
@@ -83,7 +82,7 @@ const ForgotPassword = () => {
           )}
 
           {status === 'error' && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
+            <div className="mb-6 p-5 bg-red-50 border border-red-200 rounded-xl flex items-start shadow-md">
               <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm text-red-800 font-medium">Error</p>
@@ -106,7 +105,7 @@ const ForgotPassword = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent outline-none transition-all"
+                  className="w-full pl-11 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#E46036]/30 focus:border-[#E46036] outline-none transition-all duration-300 shadow-sm"
                   disabled={loading}
                   required
                 />
@@ -116,11 +115,12 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#E46036] text-white py-3 rounded-lg font-semibold hover:bg-[#d35530] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            >
+              className={`w-full flex items-center justify-center ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#E46036] hover:bg-[#000000]'
+                  } text-white font-semibold py-3 px-4 rounded-full shadow-md transition`}
+              >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-x1 h-5 w-5 border-b-2 border-white mr-2"></div>
                   Sending...
                 </>
               ) : (
@@ -131,7 +131,7 @@ const ForgotPassword = () => {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 font-medium">
               Remember your password?{' '}
               <Link to="/login" className="text-[#E46036] hover:underline font-medium">
                 Sign in

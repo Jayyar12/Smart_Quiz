@@ -3,12 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,27 +32,27 @@ const LoginPage = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setErrors({});
+    e.preventDefault();
+    setLoading(true);
+    setErrors({});
 
-  try {
-    await login(formData);
-    navigate("/dashboard");
-  } catch (error) {
-    console.log('Full error:', error.response); // DEBUG
-    console.log('Error data:', error.response?.data); // DEBUG
-    if (error.response?.data?.errors) {
-      setErrors(error.response.data.errors);
-    } else if (error.response?.data?.message) {
-      setErrors({ general: error.response.data.message });
-    } else {
-      setErrors({ general: "An error occurred. Please try again." });
+    try {
+      await login(formData);
+      navigate("/dashboard");
+    } catch (error) {
+      console.log('Full error:', error.response); // DEBUG
+      console.log('Error data:', error.response?.data); // DEBUG
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      } else if (error.response?.data?.message) {
+        setErrors({ general: error.response.data.message });
+      } else {
+        setErrors({ general: "An error occurred. Please try again." });
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F1EDE5] text-gray-800 relative overflow-hidden">
@@ -93,7 +95,7 @@ const LoginPage = () => {
                 <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/LandingPage")}>Home</button>
                 <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/register")}>Register</button>
                 <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/login")}>Login</button>
-              </div> 
+              </div>
             </div>
           </motion.div>
         )}
@@ -145,9 +147,8 @@ const LoginPage = () => {
               type="email"
               placeholder="Email Address"
               required
-              className={`w-full px-5 py-3 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${
-                errors.email ? "border-red-500" : ""
-              }`}
+              className={`w-full px-5 py-3 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.email ? "border-red-500" : ""
+                }`}
               value={formData.email}
               onChange={handleChange}
             />
@@ -156,32 +157,41 @@ const LoginPage = () => {
             )}
           </motion.div>
 
-          {/* Password */}
+          {/*PASSWORD*/}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
+            className="relative"
           >
             <input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"} 
               placeholder="Password"
               required
-              className={`w-full px-5 py-3 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${
-                errors.password ? "border-red-500" : ""
-              }`}
+              className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white  text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password ? "border-red-500" : ""
+                }`}
               value={formData.password}
               onChange={handleChange}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}   // ✅ FIXED
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}   {/* ✅ FIXED */}
+            </button>
+
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">{errors.password[0]}</p>
             )}
           </motion.div>
 
+
           <div className="flex items-center justify-between mb-6">
-            <Link 
-              to="/forgot-password" 
+            <Link
+              to="/forgot-password"
               className="text-sm text-[#E46036] hover:underline"
             >
               Forgot password?
@@ -194,9 +204,8 @@ const LoginPage = () => {
             whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={loading}
-            className={`w-full bg-[#E46036] text-white font-semibold py-3 rounded-full shadow-lg transition hover:bg-[#000000] ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`w-full bg-[#E46036] text-white font-semibold py-3 rounded-full shadow-lg transition hover:bg-[#000000] ${loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             {loading ? "Signing in..." : "Sign In"}
           </motion.button>

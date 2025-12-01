@@ -18,11 +18,12 @@ export default function Dashboard() {
 
   const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
-  
+
   // Add refs to prevent multiple API calls
   const hasFetchedRef = useRef(false);
   const isFetchingRef = useRef(false);
-  
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [userStats, setUserStats] = useState({
@@ -72,7 +73,7 @@ export default function Dashboard() {
       });
 
       const data = response.data;
-      
+
       if (data.success) {
         setUserStats({
           totalQuizzes: data.totalQuizzes || 0,
@@ -92,13 +93,13 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('❌ Error fetching dashboard data:', error);
-      
+
       if (error.response?.status === 401) {
         localStorage.removeItem("auth_token");
         navigate("/login", { replace: true });
         return;
       }
-      
+
       setStatsError(true);
       setUserStats({
         totalQuizzes: 0,
@@ -129,25 +130,29 @@ export default function Dashboard() {
     setSidebarOpen(false);
   };
 
+  // open the logout modal
   const handleLogout = () => {
-    confirmLogout();
+    setShowLogoutModal(true);
   };
 
-  const confirmLogout = () => {
-    Swal.fire({
-      title: 'Logout?',
-      text: 'You will be signed out of your account',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, logout',
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        await logout();
-        navigate("/login");
-      }
-    });
+  // actual confirmed logout (frontend-only cleanup + redirect)
+  const confirmLogoutAction = async () => {
+    try {
+      // call your existing hook (may notify backend/session)
+      await logout();
+    } catch (err) {
+      console.error('Logout error', err);
+      // you can show an alert here if you want:
+      Swal.fire({ icon: 'error', title: 'Logout failed', text: err?.message || 'Please try again.' });
+      return;
+    } finally {
+      // frontend cleanup (no backend change)
+      localStorage.removeItem('auth_token');
+    }
+
+    // close modal and redirect
+    setShowLogoutModal(false);
+    navigate('/login', { replace: true });
   };
 
   // Handle successful quiz creation - allow manual refresh
@@ -170,7 +175,7 @@ export default function Dashboard() {
 
   // StatCard component
   const StatCard = ({ icon: Icon, title, value, subtitle, color, trend, onClick }) => (
-    <div 
+    <div
       className={`bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer hover:border-[#E46036]' : ''}`}
       onClick={onClick}
     >
@@ -270,20 +275,10 @@ export default function Dashboard() {
                 <Menu className="w-6 h-6" />
               </button>
               <h1 className="text-2xl font-bold text-gray-900">
-                {currentPage === 'create-quiz' ? 'Create Quiz' : 
-                 currentPage === 'my-results' ? 'My Results' :
-                 currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}
+                {currentPage === 'create-quiz' ? 'Create Quiz' :
+                  currentPage === 'my-results' ? 'My Results' :
+                    currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}
               </h1>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => handleNavigation('create-quiz')}
-                className="bg-[#E46036] hover:bg-[#cc4f2d] text-white px-4 py-2 rounded-lg flex items-center transition-colors"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Quiz
-              </button>
             </div>
           </div>
         </header>
@@ -320,20 +315,18 @@ export default function Dashboard() {
                   color="bg-[#E46036]"
                 />
               </div>
-
-
               {/* Recent Quizzes Section */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Recent Quiz Activity</h3>
-                  <button 
+                  <button
                     onClick={() => handleNavigation('quizzes')}
                     className="text-[#E46036] hover:text-[#cc4f2d] text-sm font-medium"
                   >
                     View All
                   </button>
                 </div>
-                
+
                 {userStats.recentQuizzes && userStats.recentQuizzes.length > 0 ? (
                   <div className="space-y-3">
                     {userStats.recentQuizzes.map((quiz) => (
@@ -347,11 +340,10 @@ export default function Dashboard() {
                             </p>
                           </div>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          quiz.is_published 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${quiz.is_published
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                          }`}>
                           {quiz.is_published ? 'Published' : 'Draft'}
                         </span>
                       </div>
@@ -379,6 +371,33 @@ export default function Dashboard() {
           {currentPage === 'my-results' && <MyResults />}
           {currentPage === 'settings' && <Settings />}
 
+          {/* Logout Confirmation Modal */}
+          {showLogoutModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full text-center">
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                  Logout Confirmation
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to log out?
+                </p>
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={() => setShowLogoutModal(false)}
+                    className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmLogoutAction}
+                    className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
