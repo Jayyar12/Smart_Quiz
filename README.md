@@ -48,8 +48,7 @@ Built with **React**, **Laravel**, and **MySQL**, Smart Quiz offers instant feed
 | **Frontend Libs** | Framer Motion, Lucide React, SweetAlert2 |
 | **Backend** | Laravel (RESTful API) |
 | **Database** | MySQL |
-| **Authentication** | Laravel Sanctum |
-| **Version** | 1.0 |
+| **Authentication** | Laravel Sanctum / JWT |
 
 ---
 
