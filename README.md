@@ -44,8 +44,6 @@ Built with **React**, **Laravel**, and **MySQL**, Smart Quiz offers instant feed
 | **Backend** | Laravel (RESTful API) |
 | **Database** | MySQL |
 | **Authentication** | Laravel Sanctum / JWT |
-| **Hosting** | AWS / Heroku |
-| **Version** | 1.0 |
 
 ---
 
