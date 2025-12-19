@@ -135,27 +135,24 @@ export default function Dashboard() {
     setShowLogoutModal(true);
   };
 
-  // actual confirmed logout (frontend-only cleanup + redirect)
+  // actual confirmed logout 
   const confirmLogoutAction = async () => {
     try {
-      // call your existing hook (may notify backend/session)
       await logout();
     } catch (err) {
       console.error('Logout error', err);
-      // you can show an alert here if you want:
       Swal.fire({ icon: 'error', title: 'Logout failed', text: err?.message || 'Please try again.' });
       return;
     } finally {
-      // frontend cleanup (no backend change)
       localStorage.removeItem('auth_token');
     }
 
-    // close modal and redirect
+    // close
     setShowLogoutModal(false);
-    navigate('/login', { replace: true });
+    navigate('/LandingPage', { replace: true });
   };
 
-  // Handle successful quiz creation - allow manual refresh
+  // Handle successful quiz creation 
   const handleQuizCreated = () => {
     // Reset flag to allow refetch
     hasFetchedRef.current = false;
@@ -176,18 +173,18 @@ export default function Dashboard() {
   // StatCard component
   const StatCard = ({ icon: Icon, title, value, subtitle, color, trend, onClick }) => (
     <div
-      className={`bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer hover:border-[#E46036]' : ''}`}
+      className={`bg-white dark:bg-[#020617] rounded-xl p-6 shadow-sm border border-gray-100 dark:border-white/10 hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer hover:border-[#E46036]' : ''}`}
       onClick={onClick}
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{loading ? '...' : value}</p>
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{title}</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">{loading ? '...' : value}</p>
           {subtitle && (
-            <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>
           )}
           {trend && (
-            <p className="text-sm text-green-600 mt-1 flex items-center">
+            <p className="text-sm text-green-600 dark:text-green-400 mt-1 flex items-center">
               <TrendingUp className="w-4 h-4 mr-1" />
               {trend}
             </p>
@@ -205,7 +202,7 @@ export default function Dashboard() {
       onClick={() => handleNavigation(pageKey)}
       className={`flex items-center w-full px-4 py-2 rounded-lg mb-2 transition-colors ${isActive
         ? 'bg-[#E46036]/10 text-[#E46036]'
-        : 'text-gray-600 hover:bg-gray-50'
+        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1E293B]'
         }`}
     >
       <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -216,43 +213,43 @@ export default function Dashboard() {
   // Show loading state while user data is being fetched
   if (!user && isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0F172A] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E46036] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0F172A] relative">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#020617] shadow-lg transform transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-white/10">
           <h2 className="text-2xl font-bold text-[#E46036]">Dashboard</h2>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden">
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-900 dark:text-white">
             <X className="w-6 h-6" />
           </button>
         </div>
         <nav className="mt-6">
           <div className="px-6 py-3">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Main</p>
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Main</p>
             <NavItem icon={BarChart3} label="Dashboard" pageKey="dashboard" isActive={currentPage === 'dashboard'} />
             <NavItem icon={BookOpen} label="My Quizzes" pageKey="quizzes" isActive={currentPage === 'quizzes'} />
             <NavItem icon={Plus} label="Create Quiz" pageKey="create-quiz" isActive={currentPage === 'create-quiz'} />
             <NavItem icon={Users} label="Join Quiz" pageKey="join" isActive={currentPage === 'join'} />
             <NavItem icon={ClipboardList} label="My Results" pageKey="my-results" isActive={currentPage === 'my-results'} />
           </div>
-          <div className="px-6 py-3 border-t border-gray-200 mt-6">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Settings</p>
+          <div className="px-6 py-3 border-t border-gray-200 dark:border-white/10 mt-6">
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Settings</p>
             <NavItem icon={SettingsIcon} label="Settings" pageKey="settings" isActive={currentPage === 'settings'} />
           </div>
         </nav>
         <div className="absolute bottom-10 left-10 right-10">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
           >
             <LogOut className="w-5 h-5 mr-3" />
             Logout
@@ -268,13 +265,13 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="lg:ml-64">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <header className="bg-white dark:bg-[#020617] shadow-sm border-b border-gray-200 dark:border-white/10 sticky top-0 z-50">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center">
-              <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4">
+              <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4 text-gray-900 dark:text-white">
                 <Menu className="w-6 h-6" />
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {currentPage === 'create-quiz' ? 'Create Quiz' :
                   currentPage === 'my-results' ? 'My Results' :
                     currentPage.charAt(0).toUpperCase() + currentPage.slice(1)}
@@ -288,10 +285,10 @@ export default function Dashboard() {
           {currentPage === 'dashboard' && (
             <>
               <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   Welcome{user?.name ? `, ${user.name}` : ''}! 👋
                 </h2>
-                <p className="text-gray-600">Here's what's happening with your quizzes today.</p>
+                <p className="text-gray-600 dark:text-gray-400">Here's what's happening with your quizzes today.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -316,9 +313,9 @@ export default function Dashboard() {
                 />
               </div>
               {/* Recent Quizzes Section */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+              <div className="bg-white dark:bg-[#020617] rounded-xl shadow-sm border border-gray-100 dark:border-white/10 p-6 mb-8">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Recent Quiz Activity</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Quiz Activity</h3>
                   <button
                     onClick={() => handleNavigation('quizzes')}
                     className="text-[#E46036] hover:text-[#cc4f2d] text-sm font-medium"
@@ -330,19 +327,19 @@ export default function Dashboard() {
                 {userStats.recentQuizzes && userStats.recentQuizzes.length > 0 ? (
                   <div className="space-y-3">
                     {userStats.recentQuizzes.map((quiz) => (
-                      <div key={quiz.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+                      <div key={quiz.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-[#1E293B] rounded-lg">
                         <div className="flex items-center">
                           <BookOpen className="w-4 h-4 text-gray-400 mr-3" />
                           <div>
-                            <p className="font-medium text-gray-900">{quiz.title}</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="font-medium text-gray-900 dark:text-white">{quiz.title}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               Updated {new Date(quiz.updated_at).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${quiz.is_published
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
                           }`}>
                           {quiz.is_published ? 'Published' : 'Draft'}
                         </span>
@@ -351,8 +348,8 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="text-center py-4">
-                    <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                    <p className="text-gray-500">No quiz activity yet</p>
+                    <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                    <p className="text-gray-500 dark:text-gray-400">No quiz activity yet</p>
                     <button
                       onClick={() => handleNavigation('create-quiz')}
                       className="text-[#E46036] hover:text-[#cc4f2d] text-sm font-medium mt-2"
@@ -374,17 +371,17 @@ export default function Dashboard() {
           {/* Logout Confirmation Modal */}
           {showLogoutModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-              <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full text-center">
-                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+              <div className="bg-white dark:bg-[#020617] rounded-xl shadow-xl p-6 max-w-sm w-full text-center border border-gray-100 dark:border-white/10">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">
                   Logout Confirmation
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Are you sure you want to log out?
                 </p>
                 <div className="flex justify-center space-x-4">
                   <button
                     onClick={() => setShowLogoutModal(false)}
-                    className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                    className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-[#1E293B] text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-[#334155] transition"
                   >
                     Cancel
                   </button>

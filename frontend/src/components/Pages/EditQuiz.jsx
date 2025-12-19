@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { quizService } from '../../services/quizService';
 import Swal from 'sweetalert2';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus } from 'lucide-react';
 
 const EditQuiz = ({ quizId, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  
+  const [showQuestionsModal, setShowQuestionsModal] = useState(false);
+
+  const originalQuizRef = useRef(null);
+
   const [quizData, setQuizData] = useState({
     title: '',
     description: '',
@@ -19,17 +22,19 @@ const EditQuiz = ({ quizId, onSuccess, onCancel }) => {
     questions: []
   });
 
+  /* ================= FETCH ================= */
+
   useEffect(() => {
-    fetchQuizData();
+    fetchQuiz();
   }, [quizId]);
 
-  const fetchQuizData = async () => {
+  const fetchQuiz = async () => {
     try {
       setLoading(true);
-      const response = await quizService.getQuiz(quizId);
-      const quiz = response.data || response;
-      
-      setQuizData({
+      const res = await quizService.getQuiz(quizId);
+      const quiz = res.data || res;
+
+      const formatted = {
         title: quiz.title || '',
         description: quiz.description || '',
         time_limit: quiz.time_limit || '',
@@ -37,67 +42,84 @@ const EditQuiz = ({ quizId, onSuccess, onCancel }) => {
         randomize_choices: quiz.randomize_choices || false,
         show_results_immediately: quiz.show_results_immediately ?? true,
         allow_review: quiz.allow_review ?? true,
-        questions: quiz.questions?.map(q => ({
-          type: q.type,
-          question_text: q.question_text,
-          points: q.points,
-          correct_answer: q.correct_answer || '',
-          choices: q.choices?.map(c => ({
-            choice_text: c.choice_text,
-            is_correct: c.is_correct
-          })) || []
-        })) || []
-      });
-    } catch (err) {
-      console.error('Error fetching quiz:', err);
-      setError('Failed to load quiz data');
-      Swal.fire('Error!', 'Failed to load quiz data', 'error');
+        questions: quiz.questions || []
+      };
+
+      originalQuizRef.current = JSON.stringify(formatted);
+      setQuizData(formatted);
+    } catch {
+      Swal.fire('Error', 'Failed to load quiz', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleQuizChange = (field, value) => {
-    setQuizData(prev => ({ ...prev, [field]: value }));
+  /* ================= UNSAVED ================= */
+
+  const isDirty = () =>
+    JSON.stringify(quizData) !== originalQuizRef.current;
+
+  useEffect(() => {
+    const warn = e => {
+      if (!isDirty()) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [quizData]);
+
+  const confirmLeave = async () => {
+    if (!isDirty()) return true;
+    const res = await Swal.fire({
+      title: 'Unsaved Changes',
+      text: 'You have unsaved changes. Leave anyway?',
+      icon: 'warning',
+      showCancelButton: true
+    });
+    return res.isConfirmed;
   };
 
-  const handleQuestionChange = (index, field, value) => {
-    const updatedQuestions = [...quizData.questions];
-    updatedQuestions[index][field] = value;
-    
-    if (field === 'type' && (value === 'identification' || value === 'essay')) {
-      updatedQuestions[index].choices = [];
+  /* ================= HANDLERS ================= */
+
+  const handleQuizChange = (f, v) =>
+    setQuizData(p => ({ ...p, [f]: v }));
+
+  const handleQuestionChange = (i, f, v) => {
+    const q = [...quizData.questions];
+    q[i][f] = v;
+
+    if (f === 'type') {
+      if (v === 'multiple_choice' && !q[i].choices?.length) {
+        q[i].choices = [
+          { choice_text: '', is_correct: false },
+          { choice_text: '', is_correct: false }
+        ];
+      }
+      if (v !== 'multiple_choice') q[i].choices = [];
     }
-    if (field === 'type' && value === 'multiple_choice' && !updatedQuestions[index].choices?.length) {
-      updatedQuestions[index].choices = [
-        { choice_text: '', is_correct: false },
-        { choice_text: '', is_correct: false }
-      ];
-    }
-    
-    setQuizData(prev => ({ ...prev, questions: updatedQuestions }));
+
+    setQuizData(p => ({ ...p, questions: q }));
   };
 
-  const handleChoiceChange = (questionIndex, choiceIndex, field, value) => {
-    const updatedQuestions = [...quizData.questions];
-    updatedQuestions[questionIndex].choices[choiceIndex][field] = value;
-    
-    if (field === 'is_correct' && value === true) {
-      updatedQuestions[questionIndex].choices.forEach((choice, idx) => {
-        if (idx !== choiceIndex) {
-          choice.is_correct = false;
-        }
+  const handleChoiceChange = (qi, ci, f, v) => {
+    const q = [...quizData.questions];
+    q[qi].choices[ci][f] = v;
+
+    if (f === 'is_correct' && v) {
+      q[qi].choices.forEach((c, i) => {
+        if (i !== ci) c.is_correct = false;
       });
     }
-    
-    setQuizData(prev => ({ ...prev, questions: updatedQuestions }));
+
+    setQuizData(p => ({ ...p, questions: q }));
   };
 
-  const addQuestion = () => {
-    setQuizData(prev => ({
-      ...prev,
+  const addQuestion = () =>
+    setQuizData(p => ({
+      ...p,
       questions: [
-        ...prev.questions,
+        ...p.questions,
         {
           type: 'multiple_choice',
           question_text: '',
@@ -110,426 +132,237 @@ const EditQuiz = ({ quizId, onSuccess, onCancel }) => {
         }
       ]
     }));
-  };
 
-  const removeQuestion = (index) => {
-    if (quizData.questions.length > 1) {
-      setQuizData(prev => ({
-        ...prev,
-        questions: prev.questions.filter((_, i) => i !== index)
-      }));
-    }
-  };
+  const removeQuestion = i =>
+    quizData.questions.length > 1 &&
+    setQuizData(p => ({
+      ...p,
+      questions: p.questions.filter((_, idx) => idx !== i)
+    }));
 
-  const addChoice = (questionIndex) => {
-    const updatedQuestions = [...quizData.questions];
-    updatedQuestions[questionIndex].choices.push({ choice_text: '', is_correct: false });
-    setQuizData(prev => ({ ...prev, questions: updatedQuestions }));
-  };
-
-  const removeChoice = (questionIndex, choiceIndex) => {
-    const updatedQuestions = [...quizData.questions];
-    if (updatedQuestions[questionIndex].choices.length > 2) {
-      updatedQuestions[questionIndex].choices.splice(choiceIndex, 1);
-      setQuizData(prev => ({ ...prev, questions: updatedQuestions }));
-    }
-  };
+  /* ================= VALIDATION ================= */
 
   const validateForm = () => {
+    setError('');
     if (!quizData.title.trim()) {
       setError('Quiz title is required');
       return false;
     }
 
     for (let i = 0; i < quizData.questions.length; i++) {
-      const question = quizData.questions[i];
-      
-      if (!question.question_text.trim()) {
+      const q = quizData.questions[i];
+
+      if (!q.question_text?.trim()) {
         setError(`Question ${i + 1} text is required`);
         return false;
       }
 
-      if (question.type === 'multiple_choice') {
-        if (!question.choices || question.choices.length < 2) {
-          setError(`Question ${i + 1} must have at least 2 choices`);
-          return false;
-        }
-
-        const hasCorrect = question.choices.some(c => c.is_correct);
-        if (!hasCorrect) {
-          setError(`Question ${i + 1} must have one correct answer`);
-          return false;
-        }
-
-        const hasEmptyChoice = question.choices.some(c => !c.choice_text.trim());
-        if (hasEmptyChoice) {
-          setError(`Question ${i + 1} has empty choices`);
+      if (q.type === 'multiple_choice') {
+        if (!q.choices?.some(c => c.is_correct)) {
+          setError(`Question ${i + 1} must have a correct answer`);
           return false;
         }
       }
 
-      if (question.type === 'identification' && !question.correct_answer?.trim()) {
-        setError(`Question ${i + 1} must have a correct answer`);
+      if (q.type === 'identification' && !q.correct_answer?.trim()) {
+        setError(`Question ${i + 1} needs a correct answer`);
         return false;
       }
     }
-
     return true;
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) {
-    return;
-  }
-  
-  try {
-    setSubmitting(true);
-    setError('');
+  const hasChanges = () => {
+    return JSON.stringify(quizData) !== originalQuizRef.current;
+  };
 
-    // Prepare quiz data with correct question structure
-    const cleanedQuizData = {
-      title: quizData.title,
-      description: quizData.description,
-      time_limit: quizData.time_limit,
-      randomize_questions: quizData.randomize_questions,
-      randomize_choices: quizData.randomize_choices,
-      show_results_immediately: quizData.show_results_immediately,
-      allow_review: quizData.allow_review,
-      questions: quizData.questions.map(q => {
-        if (q.type === 'multiple_choice') {
-          return {
-            type: q.type,
-            question_text: q.question_text,
-            points: q.points,
-            choices: q.choices.map(c => ({
-              choice_text: c.choice_text,
-              is_correct: c.is_correct
-            }))
-          };
-        } else if (q.type === 'identification') {
-          return {
-            type: q.type,
-            question_text: q.question_text,
-            points: q.points,
-            correct_answer: q.correct_answer
-          };
-        } else if (q.type === 'essay') {
-          return {
-            type: q.type,
-            question_text: q.question_text,
-            points: q.points
-          };
-        }
-      })
-    };
-    
-    const response = await quizService.updateQuiz(quizId, cleanedQuizData);
 
-    Swal.fire({
-      title: 'Success!',
-      text: 'Quiz updated successfully',
-      icon: 'success',
-      timer: 2000,
-      showConfirmButton: false
-    });
+  /* ================= SUBMIT ================= */
 
-    if (onSuccess) {
-      onSuccess(); // This will trigger MyQuizzes.jsx to refresh
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if (!hasChanges()) {
+      Swal.fire({
+        title: 'No changes detected',
+        text: 'You have not made any changes at all to the quiz',
+        icon: 'warning',
+      });
+      return;
     }
 
-  } catch (err) {
-    console.error('Error updating quiz:', err);
-    const errorMessage = err.response?.data?.message || 'Failed to update quiz';
-    const validationErrors = err.response?.data?.errors;
-
-    if (validationErrors) {
-      const errorList = Object.entries(validationErrors)
-        .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-        .join('\n');
-      
-      Swal.fire({
-        title: 'Validation Error',
-        text: errorList,
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
-    } else {
-      setError(errorMessage);
-      Swal.fire({
-        title: 'Error!',
-        text: errorMessage,
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
+    try {
+      setSubmitting(true);
+      await quizService.updateQuiz(quizId, quizData);
+      originalQuizRef.current = JSON.stringify(quizData);
+      Swal.fire('Success', 'Quiz updated', 'success');
+      onSuccess && onSuccess();
+    } catch {
+      Swal.fire('Error', 'Update failed', 'error');
+    } finally {
+      setSubmitting(false);
     }
-  } finally {
-    setSubmitting(false);
-  }
-};
+  };
 
+  /* ================= UI ================= */
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E46036] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading quiz...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <p className="text-center py-10">Loading...</p>;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto p-6">
       <button
-        onClick={onCancel}
-        className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+        type="button"
+        onClick={async () => {
+          if (await confirmLeave()) onCancel();
+        }}
+        className="bg-[#E46036] text-white px-6 py-2 rounded-lg"
       >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Quizzes
+        Cancel Editing
       </button>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+
+      {/* DETAILS */}
+      <div className="bg-white rounded-xl p-6 shadow">
+        <h2 className="text-xl font-semibold mb-4">Edit Quiz</h2>
+
+        <input
+          value={quizData.title}
+          onChange={e => handleQuizChange('title', e.target.value)}
+          className="w-full mb-3 px-3 py-2 border rounded"
+          placeholder="Quiz Title"
+        />
+
+        <textarea
+          value={quizData.description}
+          onChange={e => handleQuizChange('description', e.target.value)}
+          className="w-full px-10 py-2 border rounded"
+          placeholder="Description"
+        />
+
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={() => setShowQuestionsModal(true)}
+            className="bg-[#E46036] text-white px-6 py-2 rounded-lg"
+          >
+            Edit Questions →
+          </button>
         </div>
-      )}
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h2 className="text-xl font-semibold mb-4">Edit Quiz Details</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Title *</label>
-              <input
-                type="text"
-                value={quizData.title}
-                onChange={(e) => handleQuizChange('title', e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
-                placeholder="Enter quiz title"
-              />
-            </div>
+      {/* QUESTIONS MODAL */}
+      {showQuestionsModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center p-4">
+          <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl">
+            <form onSubmit={handleSubmit}>
+              <div className="p-6 space-y-6">
+                <h2 className="text-xl font-semibold">Questions</h2>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Description</label>
-              <textarea
-                value={quizData.description}
-                onChange={(e) => handleQuizChange('description', e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
-                rows="3"
-                placeholder="Enter quiz description"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Time Limit (minutes)</label>
-              <input
-                type="number"
-                value={quizData.time_limit}
-                onChange={(e) => handleQuizChange('time_limit', e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
-                min="1"
-                placeholder="Optional"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={quizData.randomize_questions}
-                  onChange={(e) => handleQuizChange('randomize_questions', e.target.checked)}
-                  className="mr-2 text-[#E46036] focus:ring-[#E46036]"
-                />
-                <span className="text-sm">Randomize Questions</span>
-              </label>
-
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={quizData.randomize_choices}
-                  onChange={(e) => handleQuizChange('randomize_choices', e.target.checked)}
-                  className="mr-2 text-[#E46036] focus:ring-[#E46036]"
-                />
-                <span className="text-sm">Randomize Choices</span>
-              </label>
-
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={quizData.show_results_immediately}
-                  onChange={(e) => handleQuizChange('show_results_immediately', e.target.checked)}
-                  className="mr-2 text-[#E46036] focus:ring-[#E46036]"
-                />
-                <span className="text-sm">Show Results Immediately</span>
-              </label>
-
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={quizData.allow_review}
-                  onChange={(e) => handleQuizChange('allow_review', e.target.checked)}
-                  className="mr-2 text-[#E46036] focus:ring-[#E46036]"
-                />
-                <span className="text-sm">Allow Review</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Questions</h2>
-            <button
-              type="button"
-              onClick={addQuestion}
-              className="px-4 py-2 bg-[#E46036] text-white rounded-lg hover:bg-[#cc4f2d] transition-colors"
-            >
-              Add Question
-            </button>
-          </div>
-
-          {quizData.questions.map((question, qIndex) => (
-            <div key={qIndex} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-medium">Question {qIndex + 1}</h3>
-                {quizData.questions.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeQuestion(qIndex)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Question Type</label>
-                  <select
-                    value={question.type}
-                    onChange={(e) => handleQuestionChange(qIndex, 'type', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
-                  >
-                    <option value="multiple_choice">Multiple Choice</option>
-                    <option value="identification">Identification</option>
-                    <option value="essay">Essay</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Question Text *</label>
-                  <textarea
-                    value={question.question_text}
-                    onChange={(e) => handleQuestionChange(qIndex, 'question_text', e.target.value)}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
-                    rows="2"
-                    placeholder="Enter question"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Points</label>
-                  <input
-                    type="number"
-                    value={question.points}
-                    onChange={(e) => handleQuestionChange(qIndex, 'points', parseInt(e.target.value) || 1)}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
-                    min="1"
-                  />
-                </div>
-
-                {question.type === 'multiple_choice' && (
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="block text-sm font-medium">Choices</label>
+                {quizData.questions.map((q, i) => (
+                  <div key={i} className="border rounded-xl p-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-medium">Question {i + 1}</h3>
                       <button
                         type="button"
-                        onClick={() => addChoice(qIndex)}
-                        className="text-sm text-[#E46036] hover:text-[#cc4f2d]"
+                        onClick={() => removeQuestion(i)}
+                        className="text-red-500"
                       >
-                        Add Choice
+                        <Trash2 size={18} />
                       </button>
                     </div>
-                    
-                    <div className="space-y-2">
-                      {question.choices?.map((choice, cIndex) => (
-                        <div key={cIndex} className="flex items-center gap-2">
+
+                    <select
+                      value={q.type}
+                      onChange={e =>
+                        handleQuestionChange(i, 'type', e.target.value)
+                      }
+                      className="border rounded px-2 py-1"
+                    >
+                      <option value="multiple_choice">Multiple Choice</option>
+                      <option value="identification">Identification</option>
+                    </select>
+
+                    <textarea
+                      value={q.question_text}
+                      onChange={e =>
+                        handleQuestionChange(i, 'question_text', e.target.value)
+                      }
+                      className="w-full border rounded px-3 py-2"
+                      placeholder="Question text"
+                    />
+
+                    {q.type === 'multiple_choice' &&
+                      q.choices.map((c, ci) => (
+                        <div key={ci} className="flex gap-2 items-center">
                           <input
                             type="radio"
-                            name={`correct-${qIndex}`}
-                            checked={choice.is_correct}
-                            onChange={(e) => handleChoiceChange(qIndex, cIndex, 'is_correct', e.target.checked)}
-                            className="mt-1 text-[#E46036] focus:ring-[#E46036]"
+                            checked={c.is_correct}
+                            onChange={() =>
+                              handleChoiceChange(i, ci, 'is_correct', true)
+                            }
                           />
                           <input
-                            type="text"
-                            value={choice.choice_text}
-                            onChange={(e) => handleChoiceChange(qIndex, cIndex, 'choice_text', e.target.value)}
-                            className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
-                            placeholder={`Choice ${cIndex + 1}`}
+                            value={c.choice_text}
+                            onChange={e =>
+                              handleChoiceChange(
+                                i,
+                                ci,
+                                'choice_text',
+                                e.target.value
+                              )
+                            }
+                            className="flex-1 border rounded px-2 py-1"
+                            placeholder={`Choice ${ci + 1}`}
                           />
-                          {question.choices.length > 2 && (
-                            <button
-                              type="button"
-                              onClick={() => removeChoice(qIndex, cIndex)}
-                              className="text-red-500 hover:text-red-700 text-sm px-2"
-                            >
-                              Remove
-                            </button>
-                          )}
                         </div>
                       ))}
-                    </div>
-                  </div>
-                )}
 
-                {question.type === 'identification' && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Correct Answer *</label>
-                    <input
-                      type="text"
-                      value={question.correct_answer}
-                      onChange={(e) => handleQuestionChange(qIndex, 'correct_answer', e.target.value)}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#E46036] focus:border-transparent"
-                      placeholder="Enter the correct answer"
-                    />
+                    {q.type === 'identification' && (
+                      <input
+                        value={q.correct_answer}
+                        onChange={e =>
+                          handleQuestionChange(
+                            i,
+                            'correct_answer',
+                            e.target.value
+                          )
+                        }
+                        className="w-full border rounded px-3 py-2"
+                        placeholder="Correct Answer"
+                      />
+                    )}
                   </div>
-                )}
+                ))}
 
-                {question.type === 'essay' && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-sm text-blue-800">
-                      Essay questions will require manual grading after quiz completion.
-                    </p>
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={addQuestion}
+                  className="flex items-center gap-2 text-[#E46036]"
+                >
+                  <Plus size={18} /> Add Question
+                </button>
+
+                {error && <p className="text-red-500">{error}</p>}
               </div>
-            </div>
-          ))}
-        </div>
 
-        <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex-1 bg-[#E46036] hover:bg-[#cc4f2d] text-white px-6 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {submitting ? 'Updating Quiz...' : 'Update Quiz'}
-          </button>
+              <div className="flex gap-4 p-4 border-t">
+                <button
+                  type="button"
+                  onClick={() => setShowQuestionsModal(false)}
+                  className="flex-1 bg-gray-200 rounded py-2"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-[#E46036] text-white rounded py-2"
+                >
+                  {submitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </form>
+      )}
     </div>
   );
 };

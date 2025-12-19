@@ -305,7 +305,7 @@ public function getQuizStatistics(Request $request, $quizId)
         ]);
     }
 
-    /**
+/**
  * Join quiz by code
  */
 public function joinByCode(Request $request)
@@ -356,9 +356,9 @@ public function startQuiz(Request $request, $id)
             ->findOrFail($id);
 
         // Check if user owns the quiz (can't take own quiz)
-        if ($quiz->user_id === $request->user()->id) {
-            return response()->json(['message' => 'You cannot take your own quiz'], 422);
-        }
+        // if ($quiz->user_id === $request->user()->id) {
+        //     return response()->json(['message' => 'You cannot take your own quiz'], 422);
+        // }
 
         // Check if user has already completed this quiz
         $existingCompletedAttempt = QuizAttempt::where('quiz_id', $quiz->id)
@@ -605,7 +605,6 @@ public function getResults(Request $request, $attemptId)
         ], 422);
     }
 
-    // ✅ FIX: Creators can ALWAYS see full details
     // Students can only see details if show_results_immediately is enabled
     $canSeeDetails = $isQuizCreator || $attempt->quiz->show_results_immediately;
 
@@ -629,7 +628,7 @@ public function getResults(Request $request, $attemptId)
         'percentage' => round(($attempt->score / $attempt->quiz->total_points) * 100, 2),
         'completed_at' => $attempt->completed_at,
         'allow_review' => $attempt->quiz->allow_review,
-        'show_details' => true, // ✅ Always true when this point is reached
+        'show_details' => true,
         'is_creator' => $isQuizCreator,
     ];
 
@@ -642,7 +641,6 @@ public function getResults(Request $request, $attemptId)
         ];
     }
 
-    // ✅ FIX: Include answers if review is allowed OR if user is the quiz creator
     // This ensures creators can ALWAYS see answers to grade essays
     if ($attempt->quiz->allow_review || $isQuizCreator) {
         $responseData['answers'] = $attempt->answers->map(function ($answer) {

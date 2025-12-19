@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
@@ -15,18 +16,31 @@ import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 
 function App() {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("darkMode");
+    if (saved !== null) {
+      setDarkMode(saved === "true");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode);
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
+
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Redirect root to landing page */}
           <Route path="/" element={<Navigate to="/landing" replace />} />
 
           <Route
             path="/landing"
             element={
               <PublicRoute>
-                <LandingPage />
+                <LandingPage darkMode={darkMode} setDarkMode={setDarkMode} />
               </PublicRoute>
             }
           />
@@ -39,7 +53,7 @@ function App() {
               </PublicRoute>
             }
           />
-          
+
           <Route
             path="/register"
             element={
@@ -49,7 +63,6 @@ function App() {
             }
           />
 
-          {/* Protected (auth-only) routes */}
           <Route
             path="/dashboard"
             element={
@@ -68,7 +81,6 @@ function App() {
             }
           />
 
-          {/* Join Quiz - Protected */}
           <Route
             path="/join-quiz"
             element={
@@ -78,7 +90,6 @@ function App() {
             }
           />
 
-          {/* Take Quiz - Protected */}
           <Route
             path="/take-quiz/:quizId"
             element={
@@ -88,7 +99,6 @@ function App() {
             }
           />
 
-          {/* Quiz Results - Protected */}
           <Route
             path="/quiz-results/:attemptId"
             element={
@@ -110,7 +120,6 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Catch-all for unknown routes */}
           <Route path="*" element={<Navigate to="/landing" replace />} />
         </Routes>
       </Router>
@@ -118,4 +127,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

@@ -55,9 +55,14 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F1EDE5] text-gray-800 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[#F1EDE5] dark:bg-[#0F172A] text-gray-800 dark:text-gray-100 relative overflow-hidden">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-[#FFFFFF]/90 backdrop-blur-md shadow-sm border-b border-[#E46036]/20">
+      <nav className="
+  fixed top-0 left-0 w-full z-50 px-6 py-4
+  bg-white/90 dark:bg-[#020617]/90
+  backdrop-blur-md shadow-sm
+  border-b border-[#E46036]/20 dark:border-white/10
+">
 
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
@@ -68,18 +73,18 @@ const LoginPage = () => {
             <div className="w-12 h-12 bg-[#E46036] rounded-full flex items-center justify-center shadow-lg">
               <span className="text-white font-extrabold text-2xl">SM</span>
             </div>
-            <span className="text-2xl font-bold tracking-wide text-[#000000]">Smart Quiz</span>
+            <span className="text-2xl font-bold tracking-wide text-black dark:text-white">
+              Smart Quiz
+            </span>
           </div>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-8 font-semibold text-[#000000]">
+          <div className="hidden md:flex space-x-8 font-semibold text-[#000000] dark:text-white">
             <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/LandingPage")}>Home</button>
             <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/register")}>Register</button>
             <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/login")}>Login</button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button className="md:hidden text-[#000000]" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button className="md:hidden text-[#000000] dark:text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
@@ -88,7 +93,7 @@ const LoginPage = () => {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="md:hidden absolute top-full left-0 right-0 bg-[#FFFFFF] shadow-xl border-t border-[#E46036]/20"
+            className="md:hidden absolute top-full left-0 right-0 bg-[#FFFFFF] dark:bg-[#1E293B] shadow-xl border-t border-[#E46036]/20 dark:border-white/10"
           >
             <div className="px-6 py-4 space-y-4">
               <div className="flex space-x-4">
@@ -105,14 +110,17 @@ const LoginPage = () => {
         initial={{ opacity: 0, scale: 0.9, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative bg-white border border-[#E46036]/20 rounded-3xl p-10 w-[420px] shadow-xl"
-      >
+        className="
+  relative bg-white dark:bg-[#020617]
+  border border-[#E46036]/20 dark:border-white/10
+  rounded-3xl p-10 w-[420px] shadow-xl
+" >
         {/* Branding */}
         <div className="flex flex-col items-center mb-6">
           <div className="w-16 h-16 bg-[#E46036] rounded-full flex items-center justify-center shadow-lg">
             <span className="text-white font-extrabold text-2xl">SM</span>
           </div>
-          <h2 className="mt-3 text-2xl font-bold tracking-wide text-[#000000]">
+          <h2 className="mt-3 text-2xl font-bold tracking-wide  text-black dark:text-white">
             Smart Quiz
           </h2>
         </div>
@@ -122,7 +130,7 @@ const LoginPage = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-4xl font-extrabold text-center text-[#000000] mb-8"
+          className="text-4xl font-extrabold text-center text-black dark:text-white mb-8"
         >
           Sign In
         </motion.h1>
@@ -147,7 +155,10 @@ const LoginPage = () => {
               type="email"
               placeholder="Email Address"
               required
-              className={`w-full px-5 py-3 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.email ? "border-red-500" : ""
+              className={`w-full px-5 py-3 border border-[#E46036]/20 rounded-full shadow-sm bg-white dark:bg-[#020617]
+text-gray-800 dark:text-gray-100
+placeholder-gray-500 dark:placeholder-gray-400
+focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.email ? "border-red-500" : ""
                 }`}
               value={formData.email}
               onChange={handleChange}
@@ -167,10 +178,13 @@ const LoginPage = () => {
             <input
               id="password"
               name="password"
-              type={showPassword ? "text" : "password"} 
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               required
-              className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white  text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password ? "border-red-500" : ""
+              className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-smbg-white dark:bg-[#020617]
+text-gray-800 dark:text-gray-100
+placeholder-gray-500 dark:placeholder-gray-400
+ focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password ? "border-red-500" : ""
                 }`}
               value={formData.password}
               onChange={handleChange}
@@ -178,7 +192,7 @@ const LoginPage = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}   // ✅ FIXED
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             >
               {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}   {/* ✅ FIXED */}
             </button>
@@ -204,7 +218,7 @@ const LoginPage = () => {
             whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={loading}
-            className={`w-full bg-[#E46036] text-white font-semibold py-3 rounded-full shadow-lg transition hover:bg-[#000000] ${loading ? "opacity-50 cursor-not-allowed" : ""
+            className={`w-full bg-[#E46036] text-white font-semibold py-3 rounded-full shadow-lg transition hover:bg-[#E46036] ${loading ? "opacity-50 cursor-not-allowed" : ""
               }`}
           >
             {loading ? "Signing in..." : "Sign In"}
@@ -216,7 +230,7 @@ const LoginPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="text-center text-gray-700 text-sm mt-6"
+          className="text-center text-gray-700 dark:text-gray-400 text-sm mt-6"
         >
           Don’t have an account?{" "}
           <Link to="/register" className="text-[#E46036] hover:underline">

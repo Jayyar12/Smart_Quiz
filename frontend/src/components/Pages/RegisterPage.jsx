@@ -146,12 +146,11 @@ const RegisterPage = () => {
     }
   };
 
-  {/* CARD content Form */}
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F1EDE5] px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      
+    <div className="min-h-screen flex items-center justify-center bg-[#F1EDE5] dark:bg-[#0F172A] text-gray-800 dark:text-gray-100 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-[#FFFFFF]/90 backdrop-blur-md shadow-sm border-b border-[#E46036]/20">
+      <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4 bg-white/90 dark:bg-[#020617]/90 backdrop-blur-md shadow-sm border-b border-[#E46036]/20 dark:border-white/10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div
             className="flex items-center space-x-3 cursor-pointer"
@@ -160,32 +159,31 @@ const RegisterPage = () => {
             <div className="w-12 h-12 bg-[#E46036] rounded-full flex items-center justify-center shadow-lg">
               <span className="text-white font-extrabold text-2xl">SM</span>
             </div>
-            <span className="text-2xl font-bold tracking-wide text-[#000000]">Smart Quiz</span>
+            <span className="text-2xl font-bold tracking-wide text-black dark:text-white">Smart Quiz</span>
           </div>
 
-          <div className="hidden md:flex space-x-8 font-semibold text-[#000000]">
-            <button className="hover:text-[#E46036]" onClick={() => navigate("/LandingPage")}>Home</button>
-            <button className="hover:text-[#E46036]" onClick={() => navigate("/register")}>Register</button>
-            <button className="hover:text-[#E46036]" onClick={() => navigate("/login")}>Login</button>
+          <div className="hidden md:flex space-x-8 font-semibold text-[#000000] dark:text-white">
+            <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/LandingPage")}>Home</button>
+            <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/register")}>Register</button>
+            <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/login")}>Login</button>
           </div>
 
-          <button className="md:hidden text-[#000000]" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button className="md:hidden text-[#000000] dark:text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 50 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="relative bg-white border border-[#E46036]/20 rounded-3xl p-10 w-full max-w-md shadow-xl"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden absolute top-full left-0 right-0 bg-[#FFFFFF] dark:bg-[#1E293B] shadow-xl border-t border-[#E46036]/20 dark:border-white/10"
           >
             <div className="px-6 py-4 space-y-4">
               <div className="flex space-x-4">
-                <button className="hover:text-[#E46036]" onClick={() => navigate("/LandingPage")}>Home</button>
-                <button className="hover:text-[#E46036]" onClick={() => navigate("/register")}>Register</button>
-                <button className="hover:text-[#E46036]" onClick={() => navigate("/login")}>Login</button>
+                <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/LandingPage")}>Home</button>
+                <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/register")}>Register</button>
+                <button className="hover:text-[#E46036] transition-colors" onClick={() => navigate("/login")}>Login</button>
               </div>
             </div>
           </motion.div>
@@ -197,7 +195,7 @@ const RegisterPage = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md"
+        className="max-w-md w-full space-y-8 bg-white dark:bg-[#020617] border border-[#E46036]/20 dark:border-white/10 p-8 rounded-3xl shadow-xl"
       >
         {!otpStep ? (
           <>
@@ -205,14 +203,14 @@ const RegisterPage = () => {
               <div className="w-16 h-16 bg-[#E46036] rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-white font-extrabold text-xl">SM</span>
               </div>
-              <h2 className="mt-2 text-2xl font-bold tracking-wide text-[#000000]">Smart Quiz</h2>
+              <h2 className="mt-2 text-2xl font-bold tracking-wide text-black dark:text-white">Smart Quiz</h2>
             </div>
 
             <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-3xl font-extrabold text-center text-[#000000] mb-6"
+              className="text-3xl font-extrabold text-center text-black dark:text-white mb-6"
             >
               Register Smart Quiz
             </motion.h1>
@@ -237,7 +235,7 @@ const RegisterPage = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className={`w-full px-5 py-3 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.name ? 'border-red-500' : ''}`}
+                  className={`w-full px-5 py-3 border border-[#E46036]/20 rounded-full shadow-sm bg-white dark:bg-[#020617] text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.name ? 'border-red-500' : ''}`}
                 />
                 {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name[0]}</p>}
               </motion.div>
@@ -249,7 +247,7 @@ const RegisterPage = () => {
                   name="email"
                   type="email"
                   required
-                 className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.email ? 'border-red-500' : ''}`}
+                  className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white dark:bg-[#020617] text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.email ? 'border-red-500' : ''}`}
                   placeholder="Email Address"
                   value={formData.email}
                   onChange={handleChange}
@@ -268,13 +266,13 @@ const RegisterPage = () => {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password ? 'border-red-500' : ''}`}
+                      className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white dark:bg-[#020617] text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password ? 'border-red-500' : ''}`}
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                       {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                     </button>
                   </motion.div>
-                </div>  
+                </div>
                 {formData.password && (
                   <div className="mt-2">
                     <div className="h-2 w-full bg-gray-200 rounded-full">
@@ -289,7 +287,7 @@ const RegisterPage = () => {
                           }`}
                       ></div>
                     </div>
-                    <p className="text-sm mt-1 text-gray-600">
+                    <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">
                       Strength: {strengthLabels[passwordStrength]}
                     </p>
                   </div>
@@ -305,7 +303,7 @@ const RegisterPage = () => {
                     name="password_confirmation"
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
-                    className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white text-gray-800 placeholder-gray-500 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password_confirmation ? 'border-red-500' : ''}`}
+                    className={`w-full px-5 py-3 pr-12 border border-[#E46036]/20 rounded-full shadow-sm bg-white dark:bg-[#020617] text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-4 focus:ring-[#E46036]/40 focus:border-[#E46036] outline-none transition-all duration-300 focus:scale-105 ${errors.password_confirmation ? 'border-red-500' : ''}`}
                     placeholder="Confirm Password"
                     value={formData.password_confirmation}
                     onChange={handleChange}
@@ -313,7 +311,7 @@ const RegisterPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                   >
                     {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                   </button>
@@ -341,7 +339,7 @@ const RegisterPage = () => {
               </motion.button>
 
               <div className="text-center">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Already have an account?{' '}
                   <Link to="/login" className="text-[#E46036] hover:underline">
                     Sign in here
@@ -355,8 +353,8 @@ const RegisterPage = () => {
           <form className="space-y-6" onSubmit={handleVerifyOtp}>
             <div className="text-center">
               <h2 className="text-2xl font-bold text-[#E46036] mb-2">Verify Your Email</h2>
-              <p className="text-gray-600">We've sent a 6-digit OTP to</p>
-              <p className="text-sm font-semibold text-gray-800 mt-1">{emailForOtp}</p>
+              <p className="text-gray-600 dark:text-gray-400">We've sent a 6-digit OTP to</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 mt-1">{emailForOtp}</p>
             </div>
 
             {errors.general && (
@@ -379,7 +377,7 @@ const RegisterPage = () => {
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 required
                 maxLength={6}
-                className="w-full px-3 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[#E46036] border-gray-300 text-center text-2xl tracking-widest"
+                className="w-full px-3 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-[#E46036] border-gray-300 dark:border-white/10 bg-white dark:bg-[#020617] text-gray-800 dark:text-gray-100 text-center text-2xl tracking-widest"
               />
             </div>
 
@@ -412,13 +410,13 @@ const RegisterPage = () => {
                 setEmailForOtp('');
                 setOtp('');
               }}
-              className="text-sm text-gray-600 underline mt-3"
+              className="text-sm text-gray-600 dark:text-gray-400 underline mt-3"
             >
               Cancel and Register Again
             </button>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Didn't receive the code?{' '}
                 <button
                   type="button"

@@ -310,21 +310,20 @@ export default function Settings() {
   const InlineMessage = ({ msg }) => {
     if (!msg) return null;
     const base = "px-3 py-2 rounded text-sm mb-3";
-    if (msg.type === "success") return <div className={`bg-green-50 text-green-800 border border-green-100 ${base}`}>{msg.text}</div>;
-    if (msg.type === "error") return <div className={`bg-red-50 text-red-800 border border-red-100 ${base}`}>{msg.text}</div>;
-    return <div className={`bg-gray-50 text-gray-800 border border-gray-100 ${base}`}>{msg.text}</div>;
+    if (msg.type === "success") return <div className={`bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-100 dark:border-green-800 ${base}`}>{msg.text}</div>;
+    if (msg.type === "error") return <div className={`bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-100 dark:border-red-800 ${base}`}>{msg.text}</div>;
+    return <div className={`bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border border-gray-100 dark:border-gray-700 ${base}`}>{msg.text}</div>;
   };
 
   // compact preview for collapsed question (not used here, but kept consistent with prior patterns)
   const Tab = ({ id, label, Icon }) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`w-full px-3 py-2 flex items-center gap-3 rounded-lg transition-all text-sm ${
-        activeTab === id ? "bg-gradient-to-r from-[#FFECEF] to-[#FFF6F4] shadow-sm text-[#E46036]" : "text-gray-600 hover:bg-gray-50"
-      }`}
+      className={`w-full px-3 py-2 flex items-center gap-3 rounded-lg transition-all text-sm ${activeTab === id ? "bg-gradient-to-r from-[#FFECEF] to-[#FFF6F4] dark:from-[#E46036]/20 dark:to-[#E46036]/10 shadow-sm text-[#E46036]" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1E293B]"
+        }`}
       aria-pressed={activeTab === id}
     >
-      <div className="w-9 h-9 flex items-center justify-center rounded-md bg-white border border-gray-100 shadow-sm">
+      <div className="w-9 h-9 flex items-center justify-center rounded-md bg-white dark:bg-[#020617] border border-gray-100 dark:border-white/10 shadow-sm">
         <Icon className={`w-4 h-4 ${activeTab === id ? "text-[#E46036]" : "text-gray-400"}`} />
       </div>
       <div className="text-left">
@@ -335,24 +334,24 @@ export default function Settings() {
   );
 
   return (
-    <div className="min-h-[70vh] flex items-start justify-center bg-gray-50 p-6">
+    <div className="min-h-[70vh] flex items-start justify-center bg-gray-50 dark:bg-[#0F172A] p-6">
       <div className="w-full max-w-6xl grid grid-cols-12 gap-6">
         {/* Left: tabs */}
         <aside className="col-span-12 md:col-span-4 lg:col-span-3">
           <div className="sticky top-6 space-y-4">
-            <div className="px-4 py-3 bg-gradient-to-r from-white to-white/60 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-lg font-semibold">Account Settings</h2>
-              <p className="text-sm text-gray-500 mt-1">Manage profile, security & privacy</p>
+            <div className="px-4 py-3 bg-gradient-to-r from-white to-white/60 dark:from-[#020617] dark:to-[#020617]/60 rounded-xl shadow-sm border border-gray-100 dark:border-white/10">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Account Settings</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage profile, security & privacy</p>
               <div className="mt-3 flex gap-2">
                 <button
                   onClick={() => { setActiveTab("profile"); }}
-                  className="text-xs px-3 py-1 rounded-full bg-white border text-gray-700"
+                  className="text-xs px-3 py-1 rounded-full bg-white dark:bg-[#020617] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300"
                 >
                   Quick Profile
                 </button>
                 <button
                   onClick={() => { refreshUser?.(); setAccountMessage({ type: "success", text: "Profile refreshed" }); }}
-                  className="text-xs px-3 py-1 rounded-full bg-gray-50 border text-gray-600 flex items-center gap-1"
+                  className="text-xs px-3 py-1 rounded-full bg-gray-50 dark:bg-[#1E293B] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 flex items-center gap-1"
                 >
                   <RefreshCw className="w-3 h-3" /> Refresh
                 </button>
@@ -366,9 +365,9 @@ export default function Settings() {
               <Tab id="account" label="Account" Icon={AlertTriangle} />
             </div>
 
-            <div className="mt-4 px-4 py-3 rounded-xl bg-gradient-to-r from-white to-white/60 border border-gray-100 shadow-sm">
-              <h4 className="text-sm font-medium text-gray-800">Need help?</h4>
-              <p className="text-xs text-gray-500 mt-1">Contact support if you need assistance with your account.</p>
+            <div className="mt-4 px-4 py-3 rounded-xl bg-gradient-to-r from-white to-white/60 dark:from-[#020617] dark:to-[#020617]/60 border border-gray-100 dark:border-white/10 shadow-sm">
+              <h4 className="text-sm font-medium text-gray-800 dark:text-white">Need help?</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Contact support if you need assistance with your account.</p>
             </div>
           </div>
         </aside>
@@ -380,18 +379,18 @@ export default function Settings() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18 }}
-            className="bg-white rounded-2xl shadow-md border border-gray-100 p-6"
+            className="bg-white dark:bg-[#020617] rounded-2xl shadow-md border border-gray-100 dark:border-white/10 p-6"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-xl font-semibold">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {activeTab === "profile" && "Profile Information"}
                   {activeTab === "email" && "Change Email Address"}
                   {activeTab === "password" && "Change Password"}
                   {activeTab === "account" && "Account & Security"}
                 </h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {activeTab === "profile" && "Update your display name and visible profile information."}
                   {activeTab === "email" && "Update the email address associated with your account."}
                   {activeTab === "password" && "Change your password and keep your account secure."}
@@ -405,12 +404,12 @@ export default function Settings() {
                 <InlineMessage msg={profileMessage} />
                 <form onSubmit={handleUpdateName} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Display Name</label>
                     <input
                       type="text"
                       value={profileData.name}
                       onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                      className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#E46036] outline-none text-sm"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-white dark:bg-[#020617] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#E46036] outline-none text-sm"
                       minLength={2}
                       maxLength={50}
                       required
@@ -422,9 +421,8 @@ export default function Settings() {
                     <button
                       type="submit"
                       disabled={loadingProfile || !profileChanged}
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition ${
-                        profileChanged ? "bg-[#E46036] text-white hover:bg-[#cc4f2d]" : "bg-gray-100 text-gray-500 cursor-not-allowed"
-                      }`}
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition ${profileChanged ? "bg-[#E46036] text-white hover:bg-[#cc4f2d]" : "bg-gray-100 text-gray-500 cursor-not-allowed"
+                        }`}
                     >
                       <Save className="w-4 h-4" />
                       {loadingProfile ? "Saving..." : "Save Changes"}
@@ -442,28 +440,28 @@ export default function Settings() {
                 {!showEmailVerification ? (
                   <form onSubmit={handleRequestEmailChange} className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Current Email</label>
-                      <input type="email" value={user?.email || ""} disabled className="w-full px-4 py-3 border rounded-xl bg-gray-50 text-sm" />
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Email</label>
+                      <input type="email" value={user?.email || ""} disabled className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-gray-50 dark:bg-[#1E293B] text-gray-900 dark:text-gray-400 text-sm" />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">New Email</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Email</label>
                       <input
                         type="email"
                         value={emailData.email}
                         onChange={(e) => setEmailData({ ...emailData, email: e.target.value })}
-                        className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#E46036] text-sm outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-white dark:bg-[#020617] text-gray-900 dark:text-white focus:ring-2 focus:ring-[#E46036] text-sm outline-none"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
                       <input
                         type="password"
                         value={emailData.current_password}
                         onChange={(e) => setEmailData({ ...emailData, current_password: e.target.value })}
-                        className="w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-white dark:bg-[#020617] text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
                         required
                       />
                       <p className="text-xs text-gray-400 mt-1">Used to confirm your identity</p>
@@ -473,9 +471,8 @@ export default function Settings() {
                       <button
                         type="submit"
                         disabled={loadingEmail || !emailHasChange}
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm ${
-                          emailHasChange ? "bg-[#E46036] text-white hover:bg-[#cc4f2d]" : "bg-gray-100 text-gray-500 cursor-not-allowed"
-                        }`}
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm ${emailHasChange ? "bg-[#E46036] text-white hover:bg-[#cc4f2d]" : "bg-gray-100 text-gray-500 cursor-not-allowed"
+                          }`}
                       >
                         <Mail className="w-4 h-4" />
                         {loadingEmail ? "Sending..." : "Send Verification"}
@@ -491,12 +488,12 @@ export default function Settings() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Verification Code</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Verification Code</label>
                       <input
                         type="text"
                         value={verificationToken}
                         onChange={(e) => setVerificationToken(e.target.value)}
-                        className="w-full px-4 py-3 border rounded-xl font-mono text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-white dark:bg-[#020617] text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
                         placeholder="Paste verification code"
                         required
                       />
@@ -508,7 +505,7 @@ export default function Settings() {
                         {loadingEmail ? "Verifying..." : "Verify Email"}
                       </button>
 
-                      <button type="button" onClick={() => { setShowEmailVerification(false); setVerificationToken(""); }} className="px-3 py-2 rounded-lg bg-gray-100 text-sm">
+                      <button type="button" onClick={() => { setShowEmailVerification(false); setVerificationToken(""); }} className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-[#1E293B] text-gray-900 dark:text-gray-300 text-sm">
                         Cancel
                       </button>
                     </div>
@@ -522,13 +519,13 @@ export default function Settings() {
                 <InlineMessage msg={passwordMessage} />
                 <form onSubmit={handleUpdatePassword} className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
                     <div className="relative">
                       <input
                         type={showPasswords.current ? "text" : "password"}
                         value={passwordData.current_password}
                         onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
-                        className="w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-white dark:bg-[#020617] text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
                         required
                       />
                       <button type="button" onClick={() => setShowPasswords((p) => ({ ...p, current: !p.current }))} className="absolute right-3 top-3 text-gray-400">
@@ -538,13 +535,13 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
                     <div className="relative">
                       <input
                         type={showPasswords.new ? "text" : "password"}
                         value={passwordData.password}
                         onChange={(e) => setPasswordData({ ...passwordData, password: e.target.value })}
-                        className="w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-white dark:bg-[#020617] text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
                         required
                       />
                       <button type="button" onClick={() => setShowPasswords((p) => ({ ...p, new: !p.new }))} className="absolute right-3 top-3 text-gray-400">
@@ -552,21 +549,21 @@ export default function Settings() {
                       </button>
                     </div>
                     <div className="mt-2 text-xs text-gray-400 flex items-center gap-2">
-                      <div className={`w-24 h-2 rounded ${passwordStrength >= 1 ? "bg-yellow-400" : "bg-gray-200"}`} />
-                      <div className={`w-24 h-2 rounded ${passwordStrength >= 3 ? "bg-yellow-500" : "bg-gray-200"}`} />
-                      <div className={`w-24 h-2 rounded ${passwordStrength >= 4 ? "bg-green-400" : "bg-gray-200"}`} />
+                      <div className={`w-24 h-2 rounded ${passwordStrength >= 1 ? "bg-yellow-400" : "bg-gray-200 dark:bg-gray-700"}`} />
+                      <div className={`w-24 h-2 rounded ${passwordStrength >= 3 ? "bg-yellow-500" : "bg-gray-200 dark:bg-gray-700"}`} />
+                      <div className={`w-24 h-2 rounded ${passwordStrength >= 4 ? "bg-green-400" : "bg-gray-200 dark:bg-gray-700"}`} />
                       <div className="ml-2">Use mixed characters for a strong password</div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
                     <div className="relative">
                       <input
                         type={showPasswords.confirm ? "text" : "password"}
                         value={passwordData.password_confirmation}
                         onChange={(e) => setPasswordData({ ...passwordData, password_confirmation: e.target.value })}
-                        className="w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-white dark:bg-[#020617] text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#E46036] outline-none"
                         required
                       />
                       <button type="button" onClick={() => setShowPasswords((p) => ({ ...p, confirm: !p.confirm }))} className="absolute right-3 top-3 text-gray-400">
@@ -604,17 +601,17 @@ export default function Settings() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white rounded-xl border p-4">
-                    <h4 className="font-semibold text-red-900">Delete Account</h4>
-                    <p className="text-sm text-gray-500">Permanently delete your account and all data. This can be canceled within 30 days.</p>
+                  <div className="bg-white dark:bg-[#020617] rounded-xl border border-gray-200 dark:border-white/10 p-4">
+                    <h4 className="font-semibold text-red-900 dark:text-red-400">Delete Account</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Permanently delete your account and all data. This can be canceled within 30 days.</p>
                     <form onSubmit={handleRequestDeletion} className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
                       <div>
-                        <label className="block text-sm text-gray-700 mb-1">Confirm Password</label>
-                        <input type="password" value={deletionData.password} onChange={(e) => setDeletionData({ ...deletionData, password: e.target.value })} className="w-full px-4 py-3 border rounded-xl text-sm" required />
+                        <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Confirm Password</label>
+                        <input type="password" value={deletionData.password} onChange={(e) => setDeletionData({ ...deletionData, password: e.target.value })} className="w-full px-4 py-3 border border-gray-300 dark:border-white/10 rounded-xl bg-white dark:bg-[#020617] text-gray-900 dark:text-white text-sm" required />
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <label className="flex items-center gap-2 text-sm">
+                        <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                           <input type="checkbox" checked={deletionData.confirmation} onChange={(e) => setDeletionData({ ...deletionData, confirmation: e.target.checked })} className="w-4 h-4" required />
                           I understand this will delete my account and all data
                         </label>
@@ -622,22 +619,22 @@ export default function Settings() {
 
                       <div className="md:col-span-2 flex items-center gap-3">
                         <button type="submit" disabled={loadingAccount || !deletionData.confirmation} className="px-4 py-2 rounded-lg bg-red-600 text-white">Delete Account</button>
-                        <button type="button" onClick={() => { setDeletionData({ password: "", confirmation: false }); setAccountMessage(null); }} className="px-3 py-2 rounded-lg bg-gray-100">Reset</button>
+                        <button type="button" onClick={() => { setDeletionData({ password: "", confirmation: false }); setAccountMessage(null); }} className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-[#1E293B] text-gray-900 dark:text-gray-300">Reset</button>
                       </div>
                     </form>
                   </div>
                 )}
 
-                <div className="bg-white rounded-xl border p-4">
+                <div className="bg-white dark:bg-[#020617] rounded-xl border border-gray-200 dark:border-white/10 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-semibold">Session Management</h4>
-                      <p className="text-sm text-gray-500">Logout from all other devices except this one</p>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Session Management</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Logout from all other devices except this one</p>
                     </div>
 
                     <div className="flex gap-2">
-                      <button onClick={handleLogoutAllDevices} disabled={loadingAccount} className="px-3 py-2 rounded-lg bg-gray-100 text-sm">Logout Others</button>
-                      <button onClick={() => { refreshUser?.(); setAccountMessage({ type: "success", text: "Refreshed sessions." }); }} className="px-3 py-2 rounded-lg bg-gray-50 text-sm flex items-center gap-2"><RefreshCw className="w-4 h-4" /> Refresh</button>
+                      <button onClick={handleLogoutAllDevices} disabled={loadingAccount} className="px-3 py-2 rounded-lg bg-gray-100 dark:bg-[#1E293B] text-gray-900 dark:text-gray-300 text-sm">Logout Others</button>
+                      <button onClick={() => { refreshUser?.(); setAccountMessage({ type: "success", text: "Refreshed sessions." }); }} className="px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#334155] text-gray-900 dark:text-gray-300 text-sm flex items-center gap-2"><RefreshCw className="w-4 h-4" /> Refresh</button>
                     </div>
                   </div>
 
